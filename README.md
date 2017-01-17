@@ -18,18 +18,20 @@ go get github.com/eripa/wp-version-to-slack
 
 ```shel
 $ wp-version-to-slack -help
-Usage: wordpress-to-slack -slack-token xoxp-1337-12345-67890
+Usage: wp-version-to-slack -slack-token xoxp-1337-12345-67890
 
 No output is sent unless a new version is found.
 
   -last-file string
         File for storing the previously known version (default "/tmp/wp-version-to-slack.last")
   -slack-channel string
-        Slack Channel (without #) to post to (alternatively use env var SLACK_CHANNEL)
+        Slack Channel (without #) to post to (default is set to environment variable SLACK_CHANNEL)
   -slack-emoji string
         Slack message Emoji icon (default ":mailbox:")
+  -slack-mention string
+        Space separated list of @mentions (default is set to environment variable SLACK_MENTION) (default "<!here>")
   -slack-token string
-        Slack API token (alternatively use env var SLACK_TOKEN)
+        Slack API token (default is set to environment variable SLACK_TOKEN)
   -version
         Show tool version
   -wordpress-api string
@@ -38,8 +40,26 @@ No output is sent unless a new version is found.
 
 ### Example
 
+Simply send a message:
+
 ```shell
 wp-version-to-slack -slack-token xoxp-1337-12345-67890 -slack-channel operations
+2017/01/13 11:48:53 New version: 4.7.1
+2017/01/13 11:48:53 Message successfully sent to channel ID CXXXYYYZZZ at 1484304533.000008
+```
+
+Mention specific persons:
+
+```shell
+wp-version-to-slack -slack-token xoxp-1337-12345-67890 -slack-channel operations -slack-mention "@eric"
+2017/01/13 11:48:53 New version: 4.7.1
+2017/01/13 11:48:53 Message successfully sent to channel ID CXXXYYYZZZ at 1484304533.000008
+```
+
+Using @channel or @here. Bots need to use special syntax for these, note the escaped ! to avoid shell expansion:
+
+```shell
+wp-version-to-slack -slack-token xoxp-1337-12345-67890 -slack-channel operations -slack-mention "<\!here>"
 2017/01/13 11:48:53 New version: 4.7.1
 2017/01/13 11:48:53 Message successfully sent to channel ID CXXXYYYZZZ at 1484304533.000008
 ```

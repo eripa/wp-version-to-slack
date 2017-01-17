@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	toolVersion = "0.2.0"
+	toolVersion = "0.3.0"
 )
 
 type wordpressResponse struct {
@@ -138,9 +138,10 @@ func isNew(version, persistenceFile string) (isnew bool, err error) {
 
 func main() {
 	versionCheck := flag.Bool("version", false, "Show tool version")
-	slackToken := flag.String("slack-token", os.Getenv("SLACK_TOKEN"), "Slack API token (alternatively use env var SLACK_TOKEN)")
-	slackChannel := flag.String("slack-channel", os.Getenv("SLACK_CHANNEL"), "Slack Channel (without #) to post to (alternatively use env var SLACK_CHANNEL)")
+	slackToken := flag.String("slack-token", os.Getenv("SLACK_TOKEN"), "Slack API token (default is set to environment variable SLACK_TOKEN)")
+	slackChannel := flag.String("slack-channel", os.Getenv("SLACK_CHANNEL"), "Slack Channel (without #) to post to (default is set to environment variable SLACK_CHANNEL)")
 	slackEmoji := flag.String("slack-emoji", ":mailbox:", "Slack message Emoji icon")
+	slackMention := flag.String("slack-mention", os.Getenv("SLACK_MENTION"), "Space separated list of @mentions (default is set to environment variable SLACK_MENTION)")
 	persistenceFile := flag.String("last-file", "/tmp/wp-version-to-slack.last", "File for storing the previously known version")
 	wordpressAPI := flag.String("wordpress-api", "https://api.wordpress.org/core/version-check/1.7/", "Wordpress API URL")
 	flag.Usage = func() {
@@ -170,8 +171,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	message := fmt.Sprintf("New version available: %s", version)
+	if *slackMention != "" {
+		message = fmt.Sprintf("%s - %s", message, *slackMention)
+	}
 	if isNewVersion {
 		log.Printf("New version: %s", version)
-		notifySlack(api, channelID, fmt.Sprintf("New version available: %s", version), *slackEmoji)
+		notifySlack(api, channelID, message, *slackEmoji)
 	}
 }
