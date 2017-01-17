@@ -75,4 +75,7 @@ go install
 
 ## License
 
-The MIT License (MIT), See `LICENSE`
+The MIT License (MIT)
+Copyright (c) 2017 Eric Ripa <eric@ripa.io>
+
+See [LICENSE](LICENSE) for the full license
