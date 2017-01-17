@@ -29,7 +29,7 @@ No output is sent unless a new version is found.
   -slack-emoji string
         Slack message Emoji icon (default ":mailbox:")
   -slack-mention string
-        Space separated list of @mentions (default is set to environment variable SLACK_MENTION) (default "<!here>")
+        Space separated list of @mentions (default is set to environment variable SLACK_MENTION)
   -slack-token string
         Slack API token (default is set to environment variable SLACK_TOKEN)
   -version
