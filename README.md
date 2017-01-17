@@ -1,5 +1,9 @@
 # wp-version-to-slack
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/eripa/wp-version-to-slack)](https://goreportcard.com/report/github.com/eripa/wp-version-to-slack)
+
+![Example](example.png)
+
 Simple Wordpress version checker that sends a message to the given Slack channel if the version differs from last run.
 
 Designed to be run periodically in Cron or Jenkins et al. for informing about new Wordpress version availability.
@@ -18,10 +22,14 @@ Usage: wordpress-to-slack -slack-token xoxp-1337-12345-67890
 
 No output is sent unless a new version is found.
 
+  -last-file string
+        File for storing the previously known version (default "/tmp/wp-version-to-slack.last")
   -slack-channel string
         Slack Channel (without #) to post to (alternatively use env var SLACK_CHANNEL)
+  -slack-emoji string
+        Slack message Emoji icon (default ":mailbox:")
   -slack-token string
-        Slack API token (u(alternatively use env var SLACK_TOKEN)
+        Slack API token (alternatively use env var SLACK_TOKEN)
   -version
         Show tool version
   -wordpress-api string

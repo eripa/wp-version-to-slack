@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	toolVersion = "0.1.0"
+	toolVersion = "0.2.0"
 )
 
 type wordpressResponse struct {
@@ -42,10 +42,10 @@ type wordpressResponse struct {
 	Translations []interface{} `json:"translations"`
 }
 
-func notifySlack(api *slack.Client, channelID, message string) (err error) {
+func notifySlack(api *slack.Client, channelID, message, iconEmoji string) (err error) {
 	params := slack.PostMessageParameters{
-		Username: "Wordpress Version Checker",
-		// IconEmoji: ":wizard:",
+		Username:  "Wordpress Version Checker",
+		IconEmoji: iconEmoji,
 	}
 	channel, timestamp, err := api.PostMessage(channelID, message, params)
 	if err != nil {
@@ -101,8 +101,7 @@ func getLatestWordpressVersion(apiURL string) (version string, err error) {
 	return version, nil
 }
 
-func isNew(version string) (isnew bool, err error) {
-	persistenceFile := "/tmp/wp-version-to-slack.last"
+func isNew(version, persistenceFile string) (isnew bool, err error) {
 	noSuchFileError := fmt.Sprintf("stat %s: no such file or directory", persistenceFile)
 	_, err = os.Stat(persistenceFile)
 	if err != nil {
@@ -139,8 +138,10 @@ func isNew(version string) (isnew bool, err error) {
 
 func main() {
 	versionCheck := flag.Bool("version", false, "Show tool version")
-	slackToken := flag.String("slack-token", os.Getenv("SLACK_TOKEN"), "Slack API token (u(alternatively use env var SLACK_TOKEN)")
+	slackToken := flag.String("slack-token", os.Getenv("SLACK_TOKEN"), "Slack API token (alternatively use env var SLACK_TOKEN)")
 	slackChannel := flag.String("slack-channel", os.Getenv("SLACK_CHANNEL"), "Slack Channel (without #) to post to (alternatively use env var SLACK_CHANNEL)")
+	slackEmoji := flag.String("slack-emoji", ":mailbox:", "Slack message Emoji icon")
+	persistenceFile := flag.String("last-file", "/tmp/wp-version-to-slack.last", "File for storing the previously known version")
 	wordpressAPI := flag.String("wordpress-api", "https://api.wordpress.org/core/version-check/1.7/", "Wordpress API URL")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s -slack-token xoxp-1337-12345-67890\n", os.Args[0])
@@ -165,12 +166,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	isNewVersion, err := isNew(version)
+	isNewVersion, err := isNew(version, *persistenceFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if isNewVersion {
 		log.Printf("New version: %s", version)
-		notifySlack(api, channelID, fmt.Sprintf("New version available: %s", version))
+		notifySlack(api, channelID, fmt.Sprintf("New version available: %s", version), *slackEmoji)
 	}
 }
