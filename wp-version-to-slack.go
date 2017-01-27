@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"runtime"
 
 	"os"
 
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	toolVersion = "0.3.0"
+	toolVersion = "0.4.0"
 )
 
 type wordpressResponse struct {
@@ -56,13 +57,23 @@ func notifySlack(api *slack.Client, channelID, message, iconEmoji string) (err e
 }
 
 func channelNametoID(api *slack.Client, name string) (ID string, err error) {
-	channels, err := api.GetChannels(false)
+	// Prioritize channels, if no channel is found groups (a.k.a. private channels) will be searched
+	channels, err := api.GetChannels(true)
 	if err != nil {
 		return "", err
 	}
 	for _, channel := range channels {
 		if channel.Name == name {
 			return channel.ID, nil
+		}
+	}
+	groups, err := api.GetGroups(true)
+	if err != nil {
+		return "", err
+	}
+	for _, group := range groups {
+		if group.Name == name {
+			return group.ID, nil
 		}
 	}
 	return "", fmt.Errorf("no such channel: %s", name)
@@ -151,7 +162,7 @@ func main() {
 	}
 	flag.Parse()
 	if *versionCheck {
-		fmt.Printf("%s v%s \\ʕ◔ϖ◔ʔ/\n", os.Args[0], toolVersion)
+		fmt.Printf("%s v%s runtime: %s \\ʕ◔ϖ◔ʔ/\n", os.Args[0], toolVersion, runtime.Version())
 		os.Exit(0)
 	}
 	if *slackToken == "" || *slackChannel == "" {
